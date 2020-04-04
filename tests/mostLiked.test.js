@@ -66,7 +66,7 @@ describe('Most liked posts ', () => {
       __v: 0
     }
   ]
-  /* const blogs = [
+  const blogs = [
     {
       _id: '132asdad123dsdfagjfkdj131',
       title: 'React fullstack',
@@ -92,7 +92,6 @@ describe('Most liked posts ', () => {
       __v: 0
     }
   ]
-  */
   const listWithOneBlog = [
     {
       _id: '5a422aa71b54a676234d17f8',
@@ -120,5 +119,9 @@ describe('Most liked posts ', () => {
     const result = mostLiked(nBlogs)
     // eslint-disable-next-line no-unused-vars
     expect(result).toEqual({ 'Robert C. Martin': 16 })
+  })
+  test('List with N blogs', () => {
+    const result = mostLiked(blogs)
+    expect(result).toEqual({ 'Dastan Samatov': 123 })
   })
 })
