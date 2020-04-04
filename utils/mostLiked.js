@@ -1,4 +1,4 @@
-const mostBlogs = require('../utils/mostBlogs')
+const _ = require('lodash')
 
 const nBlogs = [
   {
@@ -66,60 +66,29 @@ const nBlogs = [
   }
 ]
 
-
-/* const blogs = [
-  {
-    _id: '132asdad123dsdfagjfkdj131',
-    title: 'React fullstack',
-    author: 'Dastan Samatov',
-    url: 'https://www.example.com/attraction',
-    likes: 123,
-    __v: 0
-  },
-  {
-    _id: 'dadsadsafadsf123123131313',
-    title: 'random',
-    author: 'random dude',
-    url: 'https://example.com/random',
-    likes: 12,
-    __v: 1
-  },
-  {
-    _id: 'e123131d1312dsad2e13e112e1',
-    title: 'cools',
-    author: 'random dude',
-    url: 'https://new.com/new',
-    likes: 1,
-    __v: 0
+const mostLiked = (blogs) => {
+  if(blogs.length === 0){
+    return 0
   }
-]
-*/
-const listWithOneBlog = [
-  {
-    _id: '5a422aa71b54a676234d17f8',
-    title: 'Go To Statement Considered Harmful',
-    author: 'Edsger W. Dijkstra',
-    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-    likes: 5,
-    __v: 0
+  else if(blogs.lenth === 1) {
+    // eslint-disable-next-line no-unused-vars
+    const { _id, author, url, __v, ...post } = blogs[0]
+    return post
   }
-]
-const emptyBlog = []
+  const result = _.groupBy(blogs, 'author')
+  const reducer = (sum, item) => {
+    return sum + item.likes
+  }
+  const sorted = _.mapValues(result, values => {
+    return values.reduce(reducer, 0)
+  })
+  const value = _.max(_.values(sorted))
+  const author = _.findKey(sorted, val => value === val)
+  // eslint-disable-next-line no-unused-vars
+  return { [author]:value }
 
-describe('Most blogs', () => {
-  test('Empty list returns 0', () => {
-    const result = mostBlogs(emptyBlog)
-    expect(result).toBe(0)
-  })
-  test('List with one blogs return first entry ', () => {
-    const result = mostBlogs(listWithOneBlog)
-    expect(result).toEqual({ author: listWithOneBlog[0].author, posts: 1 })
-  })
-  test('List with n blogs returns author with most blogs', () => {
-    const result = mostBlogs(nBlogs)
-    expect(result).toEqual({
-      author: 'Robert C. Martin',
-      posts: 4
-    })
-  })
-})
+}
+
+console.log(mostLiked(nBlogs))
+
+module.exports = mostLiked
