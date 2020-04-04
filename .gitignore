@@ -6,3 +6,7 @@ node_modules
 
 #env files
 .env
+
+# temp
+
+utils/mostBlogs.js
