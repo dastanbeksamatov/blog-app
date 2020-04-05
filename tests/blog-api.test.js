@@ -107,7 +107,7 @@ describe('When there is initially saved blogs ', () => {
       }
       const blogs = await helper.blogsInDb()
       const id = blogs[1].id
-      await api.put(`/api/blogs/${id}`).send(newBlog)
+      await api.put(`/api/blogs/${id}`).send(newBlog).expect(201)
       const blogsEnd = await helper.blogsInDb()
       const updatedBlog = blogsEnd[1]
       expect(updatedBlog.likes).toBe(newBlog.likes)
