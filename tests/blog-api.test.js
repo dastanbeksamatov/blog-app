@@ -85,6 +85,34 @@ describe('When there is initially saved blogs ', () => {
         .expect(201)
     })
   })
+  describe('blog can be deleted', () => {
+    test('Blog will be deleted if id matches', async () => {
+      const blogsAtStart = await helper.blogsInDb()
+      const id = blogsAtStart[0].id
+      const title = blogsAtStart[0].title
+      await api.delete(`/api/blogs/${id}`)
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtStart).toHaveLength(blogsAtEnd.length + 1)
+      const titles = blogsAtEnd.map(blog => blog.title)
+      expect(titles).not.toContain(title)
+    })
+  })
+  describe('updating the blog', () => {
+    test('Likes property of the blog is updated to new one', async () => {
+      const newBlog = {
+        title: 'random',
+        author: 'random dude',
+        url: 'https://example.com/random',
+        likes: 1
+      }
+      const blogs = await helper.blogsInDb()
+      const id = blogs[1].id
+      await api.put(`/api/blogs/${id}`).send(newBlog)
+      const blogsEnd = await helper.blogsInDb()
+      const updatedBlog = blogsEnd[1]
+      expect(updatedBlog.likes).toBe(newBlog.likes)
+    })
+  })
 })
 afterAll(() => {
   mongoose.connection.close()
