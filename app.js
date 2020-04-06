@@ -8,6 +8,7 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const config = require('./utils/config')
 const logger = require('./utils/logger')
+const middleware = require('./utils/middleware')
 
 logger.info('Connecting to MongoDB ', config.MONGODB_URI)
 
@@ -28,8 +29,11 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.set('json spaces', 1)
+app.use(middleware.tokenExtractor)
 app.use('/api/blogs', blogRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
 
 module.exports = app
