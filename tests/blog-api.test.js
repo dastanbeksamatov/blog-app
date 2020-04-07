@@ -10,11 +10,6 @@ const User = require('../models/user')
 
 
 beforeEach(async () => {
-  await Blog.deleteMany({})
-  for (let blog of helper.initialBlogs){
-    let blogObj = new Blog(blog)
-    await blogObj.save()
-  }
   await User.deleteMany({})
   for (let user of helper.initialUsers){
     const saltRounds = 10
@@ -27,7 +22,26 @@ beforeEach(async () => {
     let userObj = new User(newUser)
     await userObj.save()
   }
+  await Blog.deleteMany({})
+  for (let blog of helper.initialBlogs){
+    let users = await helper.usersInDb()
+    const userId = users[0].id
+    blog.user = userId
+    let blogObj = new Blog(blog)
+    await blogObj.save()
+  }
 })
+
+const getToken = async () => {
+  const users = helper.initialUsers
+  const root = users[0]
+  const res = await api
+    .post('/api/login')
+    .send(root)
+    .expect(200)
+  const token = 'bearer ' + res.body.token
+  return token
+}
 
 
 describe('When there is initially saved blogs ', () => {
@@ -56,33 +70,31 @@ describe('When there is initially saved blogs ', () => {
         url: 'https://dastan.sh/blog/why_testing',
         likes: 11
       }
-
-      const users = helper.initialUsers
-      const root = users[0]
-      const res = await api
-        .post('/api/login')
-        .send(root)
-        .expect(200)
-      console.log(res.body)
+      const token = await getToken()
       await api
         .post('/api/blogs')
         .send(newBlog)
-        .set('authorization', res.body.token)
-        .expect(201)/*       const blogsAtEnd = await helper.blogsInDb()
+        .set('authorization', token)
+        .expect(204)
+      const blogsAtEnd = await helper.blogsInDb()
       expect(blogsAtEnd.length).toBe(helper.initialBlogs.length + 1)
       const titles = blogsAtEnd.map(blog => blog.title)
-      expect(titles).toContain('Why should we do testing') */
+      expect(titles).toContain(newBlog.title)
     })
-  /*     test('If object has no property [likes], init and default it to 0 ', async () => {
+    test('If object has no property [likes], init and default it to 0 ', async () => {
       const newBlog = {
         title: 'Why should we learn React',
         author: 'Dastan Samatov',
         url: 'https://dastan.sh/blog/why_React',
       }
+
+      const token = await getToken()
+
       await api
         .post('/api/blogs')
+        .set('Authorization', token)
         .send(newBlog)
-        .expect(201)
+        .expect(204)
 
       const blogsAtEnd = await helper.blogsInDb()
       const savedBlog = blogsAtEnd[helper.initialBlogs.length]
@@ -100,29 +112,50 @@ describe('When there is initially saved blogs ', () => {
         author: 'John Smith',
         likes:11
       }
+      const token = await getToken()
       await api
         .post('/api/blogs')
+        .set('Authorization', token)
         .send(testBlog1)
         .expect(400)
       await api
         .post('/api/blogs')
+        .set('Authorization', token)
         .send(testBlog2)
-        .expect(201)
-    }) */
+        .expect(204)
+    })
   })
   describe('blog can be deleted', () => {
-    test('Blog will be deleted if id matches', async () => {
+    test('Blog will be deleted if authenticated ', async () => {
+      //first we need to log in a user to generate token
+      const token = await getToken()
+
       const blogsAtStart = await helper.blogsInDb()
       const id = blogsAtStart[0].id
       const title = blogsAtStart[0].title
-      await api.delete(`/api/blogs/${id}`)
+      await api.delete(`/api/blogs/${id}`).set('Authorization', token).expect(201)
       const blogsAtEnd = await helper.blogsInDb()
-      expect(blogsAtStart).toHaveLength(blogsAtEnd.length)
+      expect(blogsAtStart).toHaveLength(blogsAtEnd.length + 1)
       const titles = blogsAtEnd.map(blog => blog.title)
       expect(titles).not.toContain(title)
     })
+    test('Blog can not be deleted by not authorized user or if token is missing ', async () => {
+      const users = helper.initialUsers
+      const admin = users[1]
+      const res = await api
+        .post('/api/login')
+        .send(admin)
+        .expect(200)
+      const token = 'bearer ' + res.body.token
+
+      const blogsAtStart = await helper.blogsInDb()
+      const id = blogsAtStart[0].id
+
+      await api.delete(`/api/blogs/${id}`).set('Authorization', token).expect(401)
+
+    })
   })
-/*   describe('updating the blog', () => {
+  describe('updating the blog', () => {
     test('Likes property of the blog is updated to new one', async () => {
       const newBlog = {
         title: 'random',
@@ -137,7 +170,7 @@ describe('When there is initially saved blogs ', () => {
       const updatedBlog = blogsEnd[1]
       expect(updatedBlog.likes).toBe(newBlog.likes)
     })
-  }) */
+  })
 })
 afterAll(() => {
   mongoose.connection.close()
