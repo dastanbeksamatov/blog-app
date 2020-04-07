@@ -6,27 +6,35 @@ const initialBlogs = [
     title: 'React fullstack',
     author: 'Dastan Samatov',
     url: 'https://www.example.com/attraction',
-    likes: 123
+    likes: 123,
+    user: '5e8a7e04727dc21d80c63bd4'
   },
   {
     title: 'random',
     author: 'random dude',
     url: 'https://example.com/random',
-    likes: 12
+    likes: 12,
+    user: '5e8a7e04727dc21d80c63bd4'
   },
   {
     title: 'cools',
     author: 'random dude',
     url: 'https://new.com/new',
-    likes: 1
+    likes: 1,
+    user: '5e8a7e04727dc21d80c63bd4'
   }
 ]
 
 const initialUsers = [
   {
     username: 'root',
-    name: 'John',
+    name: 'Liza',
     password: 'Roboto'
+  },
+  {
+    username: 'admin',
+    name: 'Das',
+    password: 'Messi'
   }
 ]
 

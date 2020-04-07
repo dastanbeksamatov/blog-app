@@ -1,5 +1,3 @@
-const logger = require('../utils/logger')
-
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
@@ -22,9 +20,7 @@ const errorHandler = (error, req, res, next) => {
 
 const tokenExtractor = (req, res, next) => {
   const authorization = req.get('authorization')
-  logger.info(authorization)
   if(authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    logger.info(authorization.substring(7))
     req.token = authorization.substring(7)
   }
   else(

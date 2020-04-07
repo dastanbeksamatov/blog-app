@@ -45,7 +45,6 @@ blogRouter.post('/', async (req, res) => {
 blogRouter.delete('/:id', async (req, res) => {
   const id = req.params.id
   const token = req.token
-  console.log(token)
   if(!token){
     return res.status(401).json({
       error: 'missing token'
@@ -58,17 +57,16 @@ blogRouter.delete('/:id', async (req, res) => {
     })
   }
   const userIdReq = decodedToken.id
-  console.log(userIdReq)
   const blog = await Blog.findById(id)
-  const userId = blog.user.id.toString()
+  const userId = blog.user.toString()
 
   if(userId !== userIdReq.toString()){
     return res.status(401).json({
       error: 'Not authorized to delete'
     })
   }
-  await blog.remove()
-  res.status(201).json(blog)
+  const removedBlog = await blog.remove()
+  res.status(201).json(removedBlog)
 })
 
 blogRouter.put('/:id', async (req, res) => {
