@@ -72,7 +72,27 @@ blogRouter.delete('/:id', async (req, res) => {
 blogRouter.put('/:id', async (req, res) => {
   const id = req.params.id
   const newLikes = req.body.likes
-  const updatedBlog = await Blog.findByIdAndUpdate(id, { likes: newLikes }, { new :true })
+  const token = req.token
+  if(!token){
+    return res.status(401).json({
+      error: 'missing token'
+    })
+  }
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if(!decodedToken.id){
+    return res.status(401).json({
+      error: 'invalid or missing token'
+    })
+  }
+  const userIdReq = decodedToken.id
+  const blog = await Blog.findById(id)
+  const userId = blog.user.toString()
+  if(userId !== userIdReq.toString()){
+    return res.status(401).json({
+      error: 'Not authorized to delete'
+    })
+  }
+  const updatedBlog = await blog.update({ likes: newLikes })
   res.status(201).json(updatedBlog)
 })
 
