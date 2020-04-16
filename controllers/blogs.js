@@ -2,7 +2,6 @@ const blogRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const logger = require('../utils/logger')
 
 blogRouter.get('/', async (req, res) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -19,7 +18,6 @@ blogRouter.post('/', async (req, res) => {
       body.likes = 0
     }
     const token = req.token
-    logger.info(token)
     if(!token){
       return res.status(401).json( { error: 'token missing' })
     }
