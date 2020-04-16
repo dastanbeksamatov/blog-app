@@ -6,7 +6,8 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "dev": "cross-env NODE_ENV=production nodemon index.js",
-    "fix": "eslint . --fix"
+    "fix": "eslint . --fix",
+    "start:test": "cross-env NODE_ENV=test nodemon index.js"
   },
   "repository": {
     "type": "git",
