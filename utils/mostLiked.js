@@ -3,7 +3,7 @@ const mostLiked = (blogs) => {
   if(blogs.length === 0){
     return 0
   }
-  else if(blogs.lenth === 1) {
+  else if(blogs.length === 1) {
     // eslint-disable-next-line no-unused-vars
     const { _id, author, url, __v, ...post } = blogs[0]
     return post
