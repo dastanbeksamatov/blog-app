@@ -12,20 +12,15 @@ blogRouter.get('/', async (req, res) => {
 
 blogRouter.post('/:id/comments', async(req, res) => {
   const body = req.body
+  body.votes = 0
   if (!body){
     res.status(400).end()
   }
   else{
     const blog = await Blog.findById(req.params.id)
-    const jsonBlog = blog.toJSON()
-    const newBlog = new Blog({
-      ...jsonBlog,
-      comments: blog.comments.concat(body),
-      id: blog._id
-    })
-    console.log(newBlog)
-    const updatedBlog = await newBlog.save()
-    res.status(201).json(updatedBlog)
+    const newComments = blog.comments
+    await blog.updateOne({ comments: newComments.concat(body) })
+    res.status(201).json(blog)
   }
 })
 
