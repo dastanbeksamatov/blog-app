@@ -8,6 +8,27 @@ blogRouter.get('/', async (req, res) => {
   res.json(blogs.map(blog => blog.toJSON()))
 })
 
+// post request for adding comments
+
+blogRouter.post('/:id/comments', async(req, res) => {
+  const body = req.body
+  if (!body){
+    res.status(400).end()
+  }
+  else{
+    const blog = await Blog.findById(req.params.id)
+    const jsonBlog = blog.toJSON()
+    const newBlog = new Blog({
+      ...jsonBlog,
+      comments: blog.comments.concat(body),
+      id: blog._id
+    })
+    console.log(newBlog)
+    const updatedBlog = await newBlog.save()
+    res.status(201).json(updatedBlog)
+  }
+})
+
 blogRouter.post('/', async (req, res) => {
   const body = req.body
   if(!body.url && !body.title) {
@@ -27,10 +48,7 @@ blogRouter.post('/', async (req, res) => {
     }
     const user = await User.findById(decodedToken.id)
     const blog = new Blog({
-      title: body.title,
-      author: body.author,
-      url: body.url,
-      likes: body.likes,
+      ...body,
       user: user._id
     })
     const savedBlog = await blog.save()
@@ -67,10 +85,11 @@ blogRouter.delete('/:id', async (req, res) => {
   res.status(201).json(removedBlog)
 })
 
+// put request to the blog
 blogRouter.put('/:id', async (req, res) => {
   const id = req.params.id
-  const newLikes = req.body.likes
   const token = req.token
+  const body = req.body
   if(!token){
     return res.status(401).json({
       error: 'missing token'
@@ -86,13 +105,12 @@ blogRouter.put('/:id', async (req, res) => {
   const blog = await Blog.findById(id)
   const userId = blog.user.toString()
   if(userId !== userIdReq.toString()){
-    console.log(userId, userIdReq)
     return res.status(401).json({
-      error: 'Not authorized to delete'
+      error: 'Not authorized to change'
     })
   }
-  const updatedBlog = await blog.updateOne({ likes: newLikes })
-  res.status(201).json(updatedBlog.config.data)
+  await blog.updateOne(body)
+  res.status(201).json(blog)
 })
 
 module.exports = blogRouter
