@@ -91,8 +91,8 @@ blogRouter.put('/:id', async (req, res) => {
       error: 'Not authorized to delete'
     })
   }
-  const updatedBlog = await blog.update({ likes: newLikes })
-  res.status(201).json(updatedBlog)
+  const updatedBlog = await blog.updateOne({ likes: newLikes })
+  res.status(201).json(updatedBlog.config.data)
 })
 
 module.exports = blogRouter
